@@ -1,11 +1,3 @@
-
-# coding: utf-8
-
-# # Dependancies
-
-# In[1]:
-
-
 import pandas as pd
 from bs4 import BeautifulSoup
 import re
@@ -20,21 +12,11 @@ def cleanhtml(raw_html):
     clean = re.sub('\s+',' ',cleantext)
     return html.unescape(clean) # replaces the special characters
 
-
-#same using beautifulsoup
-
 def remove_html_escape(html):
     return BeautifulSoup(str(html), "lxml").text
 
 
-# In[9]:
-
-
 file = input("Enter CSV File name (without '.csv' at the end): ")
-
-
-# In[10]:
-
 
 # reading the file
 try:
@@ -46,53 +28,34 @@ else:
     
 
 
-# In[11]:
-
-
 a = pd.DataFrame(d)
 print("File preview: \n",a.head(5))
 
 
-# In[15]:
+
+
+def clean_column(col: str):
+    try: 
+        a[col][0:5]
+    except:
+        print("Error in fetching column. Please check the name '%s' from the table preview above" %col)
+    else:
+        print("Column read successfully: \n", a[col][0:5])
+
+
+    a[col] = a[col].apply(cleanhtml)
 
 
 
-col = input("Enter column name: ")
+    a[col] = a[col].apply(remove_html_escape)
 
-try: 
-    a[col][0:5]
-except:
-    print("Error in fetching column. Please check the name '%s' from the table preview above" %col)
-else:
-    print("Column read successfully: \n", a[col][0:5])
-
-
-# In[16]:
-
-
-a['clean'] = a[col].apply(cleanhtml)
-
-
-# In[17]:
-
-
-a['clean_bs'] = a[col].apply(remove_html_escape)
-
-
-# In[18]:
-
+for column in a.columns:
+    clean_column(column)
 
 # a.head(5)
 
-
-# In[19]:
-
-
-a['parity'] = a[col].str.len() - a['clean'].str.len() #using regex
-a['parity_bs'] = a[col].str.len() - a['clean_bs'].str.len() #using beautifulsoup
-
-
-# In[24]:
+# a['parity'] = a[col].str.len() - a['clean'].str.len() #using regex
+# a['parity_bs'] = a[col].str.len() - a['clean_bs'].str.len() #using beautifulsoup
 
 
 # a.tail(5)
@@ -104,8 +67,6 @@ print ("Parity columns show the difference in number of characters from the orig
 
 print ("Output table: \n %s" %a.head(5))
 
-
-# In[13]:
 
 
 a.to_csv("%shtml_cleaned_output.csv"%file)
